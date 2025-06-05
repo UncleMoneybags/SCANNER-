@@ -51,12 +51,12 @@ def check_volume_spikes(tickers):
             continue
         cur_vol = bars[0].get("v", 0)
         if cur_vol > 2 * avg_volume:
-            message = f"<b>📊 Volu            message = f"<b>📊 Volume Spike Detected</b>
-<b>Ticker:</b> {ticker}
-<b>Current Vol:</b> {cur_vol:,}
-<b>Avg Vol:</b> {avg_volume:,}
-<b>Float:</b> <10M
-<b>RelVol:</b> > 2.0"
+f"<b>Volume Spike Detected</b>
+f"<b>Ticker:</b> {ticker}
+f"<b>Current Vol:</b> {cur_vol:,}
+f"<b>Avg Vol:</b> {avg_volume:,}
+f"<b>Float:</b> <10M
+f"<b>RelVol:</b> > 2.0"
             send_telegram_alert(message)
         time.sleep(1)
 
