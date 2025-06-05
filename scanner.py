@@ -1,36 +1,23 @@
-import os
-import time
 import requests
-from datetime import datetime, timedelta
+import time
+from telegram import Bot
 
+# 🔐 Environment variables (set these in Render settings)
+import os
+POLYGON_API_KEY = os.getenv("POLYGON_API_KEY")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-POLYGON_API_KEY = os.getenv("POLYGON_API_KEY")
 
+# 📤 Send alert to Telegram
 def send_telegram_alert(message):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
-        "text": message,
-        "parse_mode": "HTML"
-    }
-    try:
-        requests.post(url, data=payload)
-    except Exception as e:
-        print("Failed to send Telegram message:", e)
+    bot = Bot(token=TELEGRAM_TOKEN)
+    bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message, parse_mode="HTML")
 
+# 📊 Fetch low float tickers (placeholder — replace with actual implementation)
 def fetch_low_float_tickers():
-    url = "https://api.polygon.io/v3/reference/tickers"
-    params = {
-        "market": "stocks",
-        "active": "true",
-        "limit": 1000,
-        "apiKey": POLYGON_API_KEY
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
-    return [t['ticker'] for t in data.get("results", []) if t.get("share_class_shares_outstanding", 1e10) < 10_000_000]
+    return ["HOLO", "STSS", "UAMY", "BTBT", "AYRO", "MCTR"]  # Add more as needed
 
+# 🚨 Check for volume spikes
 def check_volume_spikes(tickers):
     for ticker in tickers:
         url = f"https://api.polygon.io/v2/aggs/ticker/{ticker}/prev"
@@ -44,22 +31,24 @@ def check_volume_spikes(tickers):
             continue
         avg_volume = results[0].get("v", 0)
 
-        url_live = f"https://api.polygon.io/v2/aggs/ticker/{ticker}/range/1/minute/{datetime.now().date()}/{datetime.now().date()}?adjusted=true&sort=desc&limit=1&apiKey={POLYGON_API_KEY}"
+        url_live = f"https://api.polygon.io/v2/aggs/ticker/{ticker}/range/1/minute/2025-06-05/2025-06-05"
         current = requests.get(url_live).json()
         bars = current.get("results", [])
         if not bars:
             continue
         cur_vol = bars[0].get("v", 0)
-        if cur_vol > 2 * avg_volume:
-message = f"<b>📈 Volume Spike Detected</b>\n"
-message += f"<b>Ticker:</b> {ticker}\n"
-message += f"<b>Current Vol:</b> {cur_vol}\n"
-message += f"<b>Avg Vol:</b> {avg_volume}\n"
-message += f"<b>Float:</b> <10M\n"
-message += f"<b>RelVol:</b> > 2.0"
-            send_telegram_alert(message)
-        time.sleep(1)
 
+        if cur_vol > 2 * avg_volume:
+            message = f"<b>📈 Volume Spike Detected</b>\n"
+            message += f"<b>Ticker:</b> {ticker}\n"
+            message += f"<b>Current Vol:</b> {cur_vol}\n"
+            message += f"<b>Avg Vol:</b> {avg_volume}\n"
+            message += f"<b>Float:</b> <10M\n"
+            message += f"<b>RelVol:</b> > 2.0"
+            send_telegram_alert(message)
+            time.sleep(1)
+
+# 🔁 Scanner loop
 def run_scanner():
     while True:
         try:
@@ -69,5 +58,6 @@ def run_scanner():
             print("Error:", e)
         time.sleep(60)
 
+# 🏁 Entry point
 if __name__ == "__main__":
     run_scanner()
