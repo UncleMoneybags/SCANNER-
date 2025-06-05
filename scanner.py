@@ -61,3 +61,5 @@ def run_scanner():
 # 🏁 Entry point
 if __name__ == "__main__":
     run_scanner()
+python-telegram-bot==13.15
+requests
