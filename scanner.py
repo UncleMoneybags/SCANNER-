@@ -51,7 +51,7 @@ def check_volume_spikes(tickers):
             continue
         cur_vol = bars[0].get("v", 0)
         if cur_vol > 2 * avg_volume:
-            message = f"<b>📊 Volume Spike Detected</b>
+            message = f"<b>📊 Volu            message = f"<b>📊 Volume Spike Detected</b>
 <b>Ticker:</b> {ticker}
 <b>Current Vol:</b> {cur_vol:,}
 <b>Avg Vol:</b> {avg_volume:,}
